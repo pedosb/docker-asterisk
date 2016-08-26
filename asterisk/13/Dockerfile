@@ -4,7 +4,10 @@ ENV build_date 2016-05-15
 
 RUN yum update -y
 RUN yum install -y epel-release
-RUN yum install git kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar jansson-devel make bzip2 -y
+RUN yum install git kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel \
+    libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel \
+    kernel-devel libuuid-devel net-snmp-devel xinetd tar jansson-devel make \
+    bzip2 opus-devel patch libsrtp-devel -y
 
 WORKDIR /tmp
 # Get pj project
@@ -24,7 +27,12 @@ WORKDIR /tmp
 
 # Download asterisk.
 RUN git clone -b certified/13.8 --depth 1 https://gerrit.asterisk.org/asterisk
+RUN git clone https://github.com/seanbright/asterisk-opus.git
 WORKDIR /tmp/asterisk
+
+RUN cp /tmp/asterisk-opus/codecs/* codecs/
+RUN cp /tmp/asterisk-opus/formats/* formats/
+RUN patch -p1 < /tmp/asterisk-opus/asterisk.patch
 
 # Configure
 RUN ./configure --libdir=/usr/lib64 1> /dev/null
